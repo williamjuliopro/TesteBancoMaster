@@ -33,11 +33,11 @@ O resultado da consulta no programa deve ser: **GRU - BRC - SCL - ORL - CDG ao c
   Digite a rota: BRC-SCL
   Melhor Rota: BRC - SCL ao custo de $5
   
-Endpoints
-GET/Rotas?{Origem}&{Destino}
-Post/Rotas?{Origem}&{Destino}&{Valor}
+#### Endpoints
+- GET/Rotas?{Origem}&{Destino} 
+- Post/Rotas?{Origem}&{Destino}&{Valor}
   
-#### Técnologias utilizadas 
+##### Técnologias utilizadas 
 - Banco de dados: PostgreSQL 9.0.23
 - Aplicação: .Net 9.0
 
