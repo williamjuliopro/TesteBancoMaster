@@ -1,5 +1,7 @@
 ﻿using RotasApi.Model;
 using RotasApi.Repository;
+using System.Drawing;
+using System.Threading.Tasks;
 
 namespace RotasApi.Services
 {
@@ -16,28 +18,26 @@ namespace RotasApi.Services
             return _context.Rotas.ToList();
         }
 
-        public List<Rotas> SalvarRota(string Origem, string Destino, decimal valor)
+        public bool VerificaRotaCadastrada(string origem, string destino, decimal valor)
         {
-            //Verifica se a rota já foi cadastrada para evitar duplicidade.
-            var RotasDB = BuscarRotas();
-            if (RotasDB.Where(x => x.Origem == Origem && x.Destino == Destino && x.Valor == valor).FirstOrDefault() != null)
-            {
-                throw new InvalidOperationException("Rota já cadastrada");                
-            }
-
-            Rotas rota = new Rotas(Origem, Destino, valor);
-            _context.Rotas.AddAsync(rota);
+            return _context.Rotas.Any(x => x.Origem == origem && x.Destino == destino && x.Valor == valor);
+        }
+        public async Task<List<Rotas>> SalvarRota(string origem, string destino, decimal valor)
+        {                
+            Rotas rota = new Rotas(origem, destino, valor);
+            await _context.Rotas.AddAsync(rota);
 
             //persiste dados no banco
             _context.SaveChanges();
 
+            List<Rotas> RotasDB = new List<Rotas>();
             RotasDB.Add(rota);
 
             return RotasDB;
         }
 
         // Função recursiva para encontrar o menor custo
-        public static void EncontrarRotaMaisBarata(string origem, string destino, List<Rotas> rotas, List<string> caminhoAtual, ref decimal menorCusto, ref List<string> melhorCaminho, decimal custoAtual)
+        private void EncontrarRotaMaisBarata(string origem, string destino, List<Rotas> rotas, List<string> caminhoAtual, ref decimal menorCusto, ref List<string> melhorCaminho, decimal custoAtual)
         {
             caminhoAtual.Add(origem);
 
@@ -66,7 +66,7 @@ namespace RotasApi.Services
             caminhoAtual.RemoveAt(caminhoAtual.Count - 1);
         }
 
-        public List<string> BuscarMelhorRoda(string origem, string destino, ref decimal menorCusto)
+        public List<string> BuscarMelhorRota(string origem, string destino, ref decimal menorCusto)
         {
             // Busca as rodas do banco      
             List<Rotas> rotas = BuscarRotas();
@@ -76,7 +76,7 @@ namespace RotasApi.Services
             List<string> melhorCaminho = null;
 
             // Chamamos a função recursiva para encontrar o menor custo
-            ServiceRotas.EncontrarRotaMaisBarata(origem, destino, rotas, new List<string>(), ref menorCusto, ref melhorCaminho, 0);
+            EncontrarRotaMaisBarata(origem, destino, rotas, new List<string>(), ref menorCusto, ref melhorCaminho, 0);
 
             return melhorCaminho;
 
